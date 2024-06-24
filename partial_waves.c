@@ -215,14 +215,14 @@ int main() {
                                     printf("reading %s \n", str);
                                     n_read += 1;
                                 }
-                                double fac = 1.0;
+                                double factor = 1.0;
                                 //if (T==0) {
-                                //    fac = -3.0;
+                                //    factor = -3.0;
                                 //}
                                 readdiag(str, x,y);
                                 interpolate(x,y,Nrows,grid,ki,fki);
                                 //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
-                                Areagauss += (1 *fac / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
+                                Areagauss += (1 *factor / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
                                 //Areagauss += (1 / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
                                 if (T==1){
                                     sprintf(str,"EMN450_ME/EMN450/VNN_N3LO_EM450new_SLLJT_%d%d%d%d%d_lambda_50.00_Np_%d_pp.dat", qS, qL, Lprime, qJ, T, Nrows);
@@ -252,7 +252,10 @@ int main() {
                             if(qS ==1){
                                 for (int steps = -1 ; steps < 2; steps++){
                                     int qL = qJ + steps;
-                                    if (qL < 1){
+                                    if (qL < 0){
+                                        continue;
+                                    }
+                                    if (qL == 0 && qJ == 0){
                                         continue;
                                     }
                                     Lprime = qL;
@@ -264,22 +267,22 @@ int main() {
                                     printf("reading %s \n", str);
                                     n_read += 1;
                                 }
-                                    double fac = 1.0;
+                                    double factor = 1.0;
                                     //if (T==0) {
-                                    //    fac = -3.0;
+                                     // fac = -3.0;
                                     //}
                                     readdiag(str, x,y);
                                     interpolate(x,y,Nrows,grid,ki,fki);
                                     //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i]* pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
-                                    Areagauss += (1 *fac/ (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;  
+                                    Areagauss += (1 *factor/ (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;  
                                     //Areagauss += (1 / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
                                     
                                     if (T==1){
                                         sprintf(str,"EMN450_ME/EMN450/VNN_N3LO_EM450new_SLLJT_%d%d%d%d%d_lambda_50.00_Np_%d_pp.dat", qS, qL, Lprime, qJ, T, Nrows);
                                            if (i == 0 && k==0){
-                                    printf("reading %s \n", str);
-                                    n_read += 1;
-                                }
+                                        printf("reading %s \n", str);
+                                        n_read += 1;
+                                    }
                                         readdiag(str, x,y);
                                         interpolate(x,y,Nrows,grid,ki,fki);
                                         //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
@@ -326,7 +329,7 @@ int main() {
                         }
                     }
                 }
-            //printf("number of elements = %d \n", n_read);
+               printf("number of elements = %d \n", n_read);
             //}
 
         }

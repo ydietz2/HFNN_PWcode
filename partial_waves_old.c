@@ -120,7 +120,7 @@ int main() {
     int rows = Nrows * Nrows;
     
     // gridsize 
-    int grid = 10;
+    int grid = 20;
     int wgrid = 20;
     int counter = 0;
 
@@ -165,10 +165,10 @@ int main() {
     //  1.21112997, 1.27498873, 1.33302101, 1.38639772, 1.43595336,
     //   1.4823061 , 1.52592814, 1.56718927, 1.60638514, 1.64375626,
     //   1.67950124, 1.7137862 , 1.74675168, 1.77851774, 1.80918786};
-    float kfar[] = {1.3, 1.5, 1.7};
+    float kfar[] = {1.05801948, 1.2111299, 1.33302101};
     for (int runner= 0; runner < 3; runner++){
     kf = kfar[runner];
-    double rho = kf*kf*kf / (3.0 * PI * PI);
+    double rho = 2.0 * kf*kf*kf / (3.0 * PI * PI);
     float Areagauss = 0.0;
     mesh(0.0, 2.0*kf, grid, pi, pwi); //p mesh
     for (int j=0; j < lpi; j++){ // p loop
@@ -178,67 +178,109 @@ int main() {
         printf("Progress: %f \n", prog);
         for (int i=0; i < lxi; i++){ // k loop
             float ctheta = (kf*kf - pi[j]*pi[j] / 4 - ki[i]* ki[i] ) / (ki[i]* pi[j]);  
-            double xmin = fmax(-1.0, -ctheta);
-            double xmax = fmin(1.0, ctheta); 
-            //double xmin = fmax(-1.0, fmin(1.0,-ctheta));
-            //double xmax = fmin(1.0, fmax(-1.0,ctheta)); 
+            //double xmin = fmax(-1.0, -ctheta);
+            //double xmax = fmin(1.0, ctheta); 
+            double xmin = fmax(-1.0, fmin(1.0,-ctheta));
+            double xmax = fmin(1.0, fmax(-1.0,ctheta)); 
             double max_min_diff = xmax - xmin;
             if (xmax < xmin){
                 continue;
-            //}
+            }
             mesh(xmin, xmax, wgrid,ti, twi );
-            for (int k = 0; k < lti; k++ ){
+            //for (int k = 0; k < lti; k++ ){
                 for (int qJ = 0; qJ <= Jmax; qJ++){
                     for (int qS = 0; qS < 2; qS++){
-                        if( qS == 0 && qJ % 2 ==0){
-                            int qL = qJ;
-                            Lprime = qL;
-                            sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_nn.dat", qS, qL, Lprime, qJ, T, Nrows);
-                            readdiag(str, x,y);
-                            interpolate(x,y,Nrows,grid,ki,fki);
-                            //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
-                            Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;  
-                            
-                        }
-                        if(qS == 1 && qJ % 2 ==0){
-                            for (int steps = -1 ; steps < 2; steps+=2){
+                        for (int qT = 0; qT <2; qT++){
+                              if (qS == 0){
+                                int qL = qJ;
+                                Lprime = qL;
+                                if ((qT + qL )%2 == 0){
+                                    continue;
+                                }
+
+                                double factor = 1.0;
+                                //if (qT==0) {
+                                //    factor = -3.0;
+                                //}
+                                sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_np.dat", qS, qL, Lprime, qJ, qT, Nrows);
+                                readdiag(str, x,y);
+                                interpolate(x,y,Nrows,grid,ki,fki);
+                                //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
+                                Areagauss += (1 / (4* PI * PI *PI)) * factor * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
+    
+                                if (qT == 1){
+                                    sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_nn.dat", qS, qL, Lprime, qJ, qT, Nrows);
+                                    readdiag(str, x,y);
+                                    interpolate(x,y,Nrows,grid,ki,fki);
+                                    //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
+                                    Areagauss += (1 / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
+
+                                    sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_pp.dat", qS, qL, Lprime, qJ, qT, Nrows);
+                                    readdiag(str, x,y);
+                                    interpolate(x,y,Nrows,grid,ki,fki);
+                                    //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
+                                    Areagauss += (1 / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
+                                }
+                              }
+                              else{
+                              
+                                for (int steps = -1 ; steps < 2; steps+=1){
                                 int qL = qJ + steps;
+                                Lprime = qL;
                                 if (qL < 0){
                                     continue;
                                 }
-                                Lprime = qL;
-                                sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_nn.dat", qS, qL, Lprime, qJ, T, Nrows);
+                                if (qL == 0 && qJ == 0){
+                                    continue;
+                                    }
+
+                                if ((qT + qL + qS )%2 == 0){
+                                    continue;
+                                }
+
+                                double factor = 1.0;
+                                //if (qT==0) {
+                                //    factor = -3.0;
+                                //}
+
+                                sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_np.dat", qS, qL, Lprime, qJ, qT, Nrows);
                                 readdiag(str, x,y);
                                 interpolate(x,y,Nrows,grid,ki,fki);
-                                //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i]* pwi[j] * twi[k] * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
-                                Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
-                                
+                                //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
+                                Areagauss += (1 / (4* PI * PI *PI)) * factor * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
+    
+                                if (qT == 1){
+                                    sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_nn.dat", qS, qL, Lprime, qJ, qT, Nrows);
+                                    readdiag(str, x,y);
+                                    interpolate(x,y,Nrows,grid,ki,fki);
+                                    //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
+                                    Areagauss += (1 / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
+
+                                    sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_pp.dat", qS, qL, Lprime, qJ, qT, Nrows);
+                                    readdiag(str, x,y);
+                                    interpolate(x,y,Nrows,grid,ki,fki);
+                                    //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * twi[k] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
+                                    Areagauss += (1 / (4* PI * PI *PI)) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ; 
+                                }
+                              }
+
+
+
                             }
-                        }
-                        if(qS ==1 && qJ %2 !=0){
-                            int qL = qJ;
-                            Lprime = qL;
-                            sprintf(str,"magic_ME/VNN_N3LO_EM500_SLLJT_%d%d%d%d%d_lambda_1.80_Np_%d_nn.dat", qS, qL, Lprime, qJ, T, Nrows);
-                            readdiag(str, x,y);
-                            interpolate(x,y,Nrows,grid,ki,fki);
-                            //Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j]  * twi[k]* (2.0 * qJ +1.0) *  fki[i] * unit * 2.0 ;
-                            Areagauss += 1 / (4* PI * PI *PI) * ki[i]* ki[i] * pi[j]* pi[j] * kwi[i] * pwi[j] * max_min_diff * (2.0 * qJ +1.0) * fki[i] * unit * 2.0 ;
-                            
-
-                        }
+                        }   
                     }
-                }
-            }
 
+                 }
+           // }
         }
-
     }
     printf("%lf %lf \n", kf, Areagauss / rho);
+    printf("density = %lf \n", rho);
     fprintf(savefile,"%lf %lf \n", kf, Areagauss/rho );
     }
     fclose(savefile);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Time spent: %lf \n", time_spent ); // 1365s
-}
+    printf("Time spent: %lf \n", time_spent ); // 1365s 
+    }
